@@ -60,6 +60,8 @@ plt.xticks(rotation=45)
 plt.title("Sentiment Distribution per Top Topic")
 plt.show()
 
+import numpy as np
+
 negative_ratio = (
     df.assign(is_negative=df["sentiment"] == "negative")
     .groupby("topic")["is_negative"]
@@ -68,9 +70,49 @@ negative_ratio = (
     .head(10)
 )
 
-plt.figure()
-negative_ratio.plot(kind="bar")
-plt.title("Top 10 Brands with Highest Negative Sentiment Ratio")
-plt.ylabel("Negative Sentiment Ratio")
+values = negative_ratio.values
+labels = negative_ratio.index
+y_pos = np.arange(len(values))
+
+fig, ax = plt.subplots(figsize=(10,5))
+ax.barh(
+    y_pos,
+    [1] * len(values),
+    color="#e0e0e0",
+    height=0.6
+)
+
+ax.barh(
+    y_pos,
+    values,
+    color=plt.cm.Reds(values / values.max()),
+    height=0.6
+)
+
+ax.set_yticks(y_pos)
+ax.set_yticklabels(labels)
+ax.invert_yaxis()
+ax.set_xlim(0, 1)
+ax.set_title("Top 10 Brands with Highest Negative Sentiment Ratio")
+ax.set_xlabel("Negative Sentiment Ratio")
+
+for i, v in enumerate(values):
+  ax.text(
+      v - 0.03 if v > 0.08 else v + 0.02,
+      i,
+      f"{v:.0%}",
+      va="center",
+      ha="right" if v > 0.08 else "left",
+      color="white" if v > 0.08 else "black",
+      fontsize=9,
+      fontweight="bold"
+  )
+
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+ax.spines["left"].set_visible(False)
+ax.tick_params(axis="y", length=0)
+
+plt.tight_layout()
 plt.show()
 
